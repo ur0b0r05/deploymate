@@ -12,35 +12,42 @@ class FileHandler:
     def __init__(self):
         self.logger = logging.getLogger(__name__)
         self.directory_handler = DirectoryHandler()
+        self.base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # Project base directory
+        self.files_to_upload_dir = os.path.join(self.base_dir, 'config', 'files_to_upload')
 
     def execute(self, task, ssh_client):
         action = task.get('action')
-        file_path = task.get('file_path')
+        file_paths = task.get('files', [])
+        remote_path = task.get('remote_path')
 
-        if not file_path:
-            raise FileHandlerError("No file path specified in the task.")
+        if not remote_path:
+            raise FileHandlerError("No remote path specified in the task.")
 
         try:
-            if action in ['create', 'overwrite', 'upload']:
-                directory_path = os.path.dirname(file_path)
-                self.directory_handler.execute({'action': 'create', 'directory_path': directory_path}, ssh_client)
-
-                if action == 'create':
-                    self.create_file(ssh_client, file_path, task.get('content', ''))
-                elif action == 'overwrite':
-                    self.overwrite_file(ssh_client, file_path, task.get('content', ''))
-                elif action == 'upload':
-                    local_path = task.get('local_path')
-                    self.upload_and_move_file(ssh_client, local_path, file_path)
-
+            if action in ['create', 'overwrite']:
+                content = task.get('content', '')
+                for file_name in file_paths:
+                    full_file_path = os.path.join(remote_path, file_name)
+                    if action == 'create':
+                        self.create_file(ssh_client, full_file_path, content)
+                    elif action == 'overwrite':
+                        self.overwrite_file(ssh_client, full_file_path, content)
             elif action == 'delete':
-                self.delete_file(ssh_client, file_path)
+                for file_name in file_paths:
+                    full_file_path = os.path.join(remote_path, file_name)
+                    self.delete_file(ssh_client, full_file_path)
+            elif action == 'upload':
+                # Ensure the remote directory exists
+                self.directory_handler.execute({'action': 'create', 'directory_path': remote_path}, ssh_client)
 
+                for file_name in file_paths:
+                    local_file_path = os.path.join(self.files_to_upload_dir, file_name)
+                    remote_file_path = os.path.join(remote_path, file_name)
+                    self.upload_and_move_file(ssh_client, local_file_path, remote_file_path)
             else:
                 raise FileHandlerError(f"Invalid or unsupported action '{action}' specified.")
-
-        except SSHConnectionError as e:
-            self.logger.error(f"Error during file '{action}' on '{file_path}': {e}")
+        except Exception as e:
+            self.logger.error(f"Error during file '{action}' on '{remote_path}': {e}")
             raise FileHandlerError(e)
 
     def create_file(self, ssh_client, file_path, content):
@@ -59,26 +66,32 @@ class FileHandler:
         self.logger.info(f"File deleted at {file_path}")
 
     def upload_and_move_file(self, ssh_client, local_path, remote_final_path):
+        """Uploads a file to a temporary path and then moves it to the final path."""
+        if not os.path.isfile(local_path):
+            raise FileHandlerError(f"File does not exist: {local_path}")
+
+        # Temporary upload path in the home directory of the 'ubuntu' user
         intermediate_path = "/home/ubuntu/" + os.path.basename(local_path)
+
+        # Upload the file to the temporary path
         scp_transfer = SCPTransfer(ssh_client)
         scp_transfer.upload_file(local_path, intermediate_path)
-        self.move_file(ssh_client, intermediate_path, remote_final_path)
 
-    def move_file(self, ssh_client, original_path, target_path):
-        move_command = f"sudo mv {original_path} {target_path}"
+        # Move the file to the final path using sudo
+        move_command = f"sudo mv {intermediate_path} {remote_final_path}"
         stdout, stderr, exit_code = ssh_client.execute_command(move_command)
         if exit_code != 0:
             self.logger.error(f"Failed to move file. STDOUT: {stdout}, STDERR: {stderr}")
-            raise Exception("Failed to move file")
+            raise FileHandlerError("Failed to move file")
         else:
-            self.logger.info(f"File moved to {target_path}")
+            self.logger.info(f"File moved to {remote_final_path}")
 
-# Example usage:
+# Example usage (commented out)
 # file_task = {
-#     'local_path': '/local/path/file.txt',
-#     'remote_temp_path': '/upload/ubuntu/temp_file.txt',
-#     'remote_final_path': '/remote/path/file.txt'
+#     'action': 'upload',
+#     'files': ['file1.txt', 'file2.txt'],
+#     'remote_path': '/remote/path'
 # }
 # ssh_client = SSHConnection(host='example.com', user='user', key_file='/path/to/key.pem')
 # handler = FileHandler()
-# handler.upload_and_move_file(ssh_client, file_task['local_path'], file_task['remote_temp_path'], file_task['remote_final_path'])
+# handler.execute(file_task, ssh_client)

@@ -1,5 +1,8 @@
+# playbook_executor.py
+
 import logging
-from deploymate import yaml_parser
+import os
+from deploymate.utils import yaml_parser
 from deploymate.resource_handler_factory import TaskResourceHandlerFactory
 from deploymate.utils.ssh_module import SSHConnection, SSHConnectionManager, SSHConnectionError
 
@@ -46,10 +49,16 @@ def execute_playbook(playbook, inventory):
     """Execute tasks defined in a playbook for hosts in the inventory."""
     connection_manager = SSHConnectionManager()
 
+    # Base directory for the SSH key (assumes this script is in the same directory as the config folder)
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+
     # Establish connections to all hosts
     for host_name, host_info in inventory['all']['hosts'].items():
         if 'ssh_private_key_file' in host_info:
-            host_info['key_file'] = host_info.pop('ssh_private_key_file')
+            # Construct the absolute path for the SSH key file
+            relative_key_path = host_info.pop('ssh_private_key_file').lstrip('./')
+            ssh_key_path = os.path.join(base_dir, 'config', relative_key_path)
+            host_info['key_file'] = ssh_key_path
 
         try:
             connection = SSHConnection(**host_info)
@@ -83,6 +92,6 @@ def execute_playbook_from_files(playbook_path, inventory_path, data_provider):
     inventory = data_provider.parse_inventory(inventory_path)
     execute_playbook(playbook, inventory)
 
-# Example usage
+# Example usage (commented out)
 # yaml_data_provider = YAMLDataProvider()
 # execute_playbook_from_files('path/to/playbook.yml', 'path/to/inventory.yml', yaml_data_provider)

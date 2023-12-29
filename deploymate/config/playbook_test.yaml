@@ -1,13 +1,24 @@
 # file_operations_playbook.yml
 tasks:
-  # Uploading a file
-  - name: Upload a file
-    type: file
-    action: upload
-    local_path: /Users/mav/Deploymate/deploymate/deploymate/deploymate-playbook.yaml
-    file_path: /home/ubuntu/scp/deploymate-playbook.yaml # Use file_path to match remote_path
+  - name: Update package lists
+    type: update
+    action: update
     hosts: all
 
+  - name: Upgrade installed packages
+    type: update
+    action: upgrade
+    hosts: all
+
+  # Uploading a file
+  - name: Upload specific files
+    type: file
+    action: upload
+    files:
+      - inventory_test.yaml
+      - pair-ansible-challenge.pem
+    remote_path: /remote/directory/path
+    hosts: all
 
   # Creating a persistent file
   - name: Create a persistent file
@@ -29,7 +40,7 @@ tasks:
   - name: Create a temporary file
     type: file
     action: create
-    file_path: /remote/path/temporary_file.txt
+    remote_path: /remote/path/temporary_file.txt
     content: "This is a temporary file."
     hosts: all
 
@@ -37,7 +48,7 @@ tasks:
   - name: Modify the temporary file
     type: file
     action: overwrite
-    file_path: /remote/path/temporary_file.txt
+    remote_path: /remote/path/temporary_file.txt
     content: "Modified content of temporary file."
     hosts: all
 
@@ -45,5 +56,61 @@ tasks:
   - name: Delete the temporary file
     type: file
     action: delete
-    file_path: /remote/path/temporary_file.txt
+    remote_path: /remote/path/temporary_file.txt
     hosts: all
+
+  - name: Install a persistent package (cowsay)
+    type: package
+    action: install
+    package_name: cowsay
+    hosts: all
+
+  - name: Remove the persistant package on host-2
+    type: package
+    action: remove
+    package_name: cowsay
+    hosts: ["testserver2"]
+
+
+
+  - name: Create a persistent directory 
+    type: directory
+    action: create
+    directory_path: /home/ubuntu/test_directory0001
+    hosts: all
+
+  - name: Remove the directory on one host
+    type: directory
+    action: delete
+    directory_path: /home/ubuntu/test_directory0001
+    hosts: ["testserver1"]
+
+
+  - name: Create a test file
+    type: command
+    command: touch /home/ubuntu/testcomandfile00.txt
+    hosts: all
+
+  - name: Install a persistent package (cowsay)
+    type: package
+    action: install
+    package_name: apache2
+    hosts: all
+  
+  - name: Start the Apache2 service
+    type: service
+    action: start
+    service_name: apache2
+    hosts: all
+  
+  - name: Stop the Apache2 service
+    type: service
+    action: stop
+    service_name: apache2
+    hosts: all
+
+  - name: Restart the Apache2 service
+    type: service
+    action: restart
+    service_name: apache2
+    hosts: ["testserver1"]
