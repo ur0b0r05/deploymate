@@ -1,0 +1,49 @@
+# file_operations_playbook.yml
+tasks:
+  # Uploading a file
+  - name: Upload a file
+    type: file
+    action: upload
+    local_path: /Users/mav/Deploymate/deploymate/deploymate/deploymate-playbook.yaml
+    file_path: /home/ubuntu/scp/deploymate-playbook.yaml # Use file_path to match remote_path
+    hosts: all
+
+
+  # Creating a persistent file
+  - name: Create a persistent file
+    type: file
+    action: create
+    file_path: /remote/path/persistent_file.txt
+    content: "This is a persistent file."
+    hosts: all
+
+  # Modifying the persistent file
+  - name: Modify the persistent file
+    type: file
+    action: overwrite
+    file_path: /remote/path/persistent_file.txt
+    content: "Modified content of persistent file."
+    hosts: all
+
+  # Creating a temporary file
+  - name: Create a temporary file
+    type: file
+    action: create
+    file_path: /remote/path/temporary_file.txt
+    content: "This is a temporary file."
+    hosts: all
+
+  # Modifying the temporary file
+  - name: Modify the temporary file
+    type: file
+    action: overwrite
+    file_path: /remote/path/temporary_file.txt
+    content: "Modified content of temporary file."
+    hosts: all
+
+  # Deleting the temporary file
+  - name: Delete the temporary file
+    type: file
+    action: delete
+    file_path: /remote/path/temporary_file.txt
+    hosts: all

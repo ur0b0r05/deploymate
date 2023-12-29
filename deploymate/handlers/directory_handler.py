@@ -1,5 +1,5 @@
 import logging
-from deploymate.ssh_module import SSHConnection, SSHConnectionManager
+from deploymate.utilsssh_module import SSHConnection, SSHConnectionManager
 
 logging.basicConfig(level=logging.DEBUG)  # Set logging level to DEBUG
 logger = logging.getLogger(__name__)

@@ -1,7 +1,7 @@
 # service_handler.py
 
 import logging
-from deploymate.ssh_module import SSHConnection, SSHConnectionManager
+from deploymate.utils.ssh_module import SSHConnection, SSHConnectionManager
 
 class ServiceHandlerError(Exception):
     """Custom exception for service handling errors."""

@@ -1,5 +1,5 @@
 import logging
-from deploymate.ssh_module import SSHConnection, SSHConnectionError
+from deploymate.utils.ssh_module import SSHConnection, SSHConnectionError
 
 class PackageHandlerError(Exception):
     """Custom exception for package handling errors."""

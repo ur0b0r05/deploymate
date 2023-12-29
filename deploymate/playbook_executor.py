@@ -1,7 +1,7 @@
 import logging
 from deploymate import yaml_parser
 from deploymate.resource_handler_factory import TaskResourceHandlerFactory
-from deploymate.ssh_module import SSHConnection, SSHConnectionManager, SSHConnectionError
+from deploymate.utils.ssh_module import SSHConnection, SSHConnectionManager, SSHConnectionError
 
 # Set up logging
 logging.basicConfig(level=logging.DEBUG)

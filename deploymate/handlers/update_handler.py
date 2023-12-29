@@ -1,7 +1,7 @@
 # update_handler.py
 
 import logging
-from ..ssh_module import SSHConnection, SSHConnectionManager
+from deploymate.utils.ssh_module import SSHConnection, SSHConnectionManager
 
 class UpdateHandlerError(Exception):
     """Custom exception for update handling errors."""

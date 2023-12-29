@@ -1,8 +1,8 @@
 import logging
 import os
-from deploymate.ssh_module import SSHConnection, SSHConnectionError
+from deploymate.utils.ssh_module import SSHConnection, SSHConnectionError
 from deploymate.handlers.directory_handler import DirectoryHandler
-from deploymate.scp_transfer import SCPTransfer
+from deploymate.utils.scp_transfer import SCPTransfer
 
 class FileHandlerError(Exception):
     """Custom exception for file handling errors."""

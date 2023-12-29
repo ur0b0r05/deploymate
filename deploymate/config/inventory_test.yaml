@@ -1,0 +1,13 @@
+# inventory.yml
+
+all:
+  hosts:
+    testserver1:
+      host: 52.91.145.229
+      user: ubuntu
+      ssh_private_key_file: ./pairansiblechallenge.pem
+
+    testserver2:
+          host: 54.144.198.97
+          user: ubuntu
+          ssh_private_key_file: ./pairansiblechallenge.pem

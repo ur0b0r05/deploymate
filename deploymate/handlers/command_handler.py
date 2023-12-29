@@ -1,5 +1,5 @@
 import logging
-from deploymate.ssh_module import SSHConnection, SSHConnectionManager, SSHConnectionError
+from deploymate.utils.ssh_module import SSHConnection, SSHConnectionManager, SSHConnectionError
 
 class CommandHandler:
     """Handler for executing shell commands on a remote server."""

@@ -3,7 +3,7 @@
 import argparse
 import logging
 import os
-from .playbook_executor import execute_playbook_from_files, YAMLDataProvider
+from deploymate.playbook_executor import execute_playbook_from_files, YAMLDataProvider
 
 def validate_file(file_path):
     """Check if a file exists and is readable."""
